@@ -10,33 +10,45 @@ import re
 import random
 import threading
 import time
+import RPi.GPIO as GPIO
+import Tkinter 
 
+GPIO.setup(11, GPIO.IN)#Button
+GPIO.setup(13, GPIO.IN)#Button
+GPIO.setup(15, GPIO.IN)#Button
+GPIO.setup(7, GPIO.IN)#Button
+
+GPIO.setup(12, GPIO.OUT)#LCD Display
+GPIO.setup(16, GPIO.OUT)#LCD Display
+GPIO.setup(22, GPIO.OUT)#LCD Display
+GPIO.setup(18, GPIO.OUT #LCD Display
 
 fm_process = None
 on_off = ["off", "on"]
-config_location = "/pirateradio/pirateradio.conf"
 
-frequency = 87.9
-shuffle = False
-repeat_all = False
-merge_audio_in = False
-play_stereo = True
-music_dir = "/pirateradio"
+int x=0;
+
+global frequency = 88.1
+global shuffle = False
+global repeat_all = False
+global merge_audio_in = False
+global play_stereo = True
+global music_dir = "/pirateradio"
 
 music_pipe_r,music_pipe_w = os.pipe()
 microphone_pipe_r,microphone_pipe_w = os.pipe()
 
 def main():
+	intro()
 	daemonize()
 	setup()
 	files = build_file_list()
 	if repeat_all == True:
-		while(True):
+		while(x<1):
 			play_songs(files)
 	else:
 		play_songs(files)
 	return 0
-
 
 
 def build_file_list():
@@ -49,6 +61,17 @@ def build_file_list():
 				file_list.append(os.path.join(root, filename))
 	return file_list
 
+def intro():
+	print("Thanks for making this amazing project,")
+	time.sleep(4)
+	print("You can use the keys to control your board,")
+	time.sleep(4)
+	print("The center button is SELECT")
+	time.sleep(4)
+	print("The up and down buttons are to select which device you can't find or when you need to add a device")
+	time.sleep(7)
+	print("The right and left buttons are to select the code and name of the device. ")
+	time.sleep(6)
 
 
 def play_songs(file_list):
@@ -75,26 +98,6 @@ def play_songs(file_list):
 			else:
 				subprocess.call(["ffmpeg","-i",filename,"-f","s16le","-acodec","pcm_s16le","-ac", "2" if play_stereo else "1" ,"-ar","44100","-"],stdout=music_pipe_w, stderr=dev_null)
 
-
-
-def read_config():
-	global frequency
-	global shuffle
-	global repeat_all
-	global play_stereo
-	global music_dir
-	try:
-		config = configparser.ConfigParser()
-		config.read(config_location)
-		
-	except:
-		print("Error reading from config file.")
-	else:
-		play_stereo = config.get("pirateradio", 'stereo_playback', fallback=True)
-		frequency = config.get("pirateradio",'frequency')
-		shuffle = config.getboolean("pirateradio",'shuffle',fallback=False)
-		repeat_all = config.getboolean("pirateradio",'repeat_all', fallback=False)
-		music_dir = config.get("pirateradio", 'music_dir', fallback="/pirateradio")
 
 def parse_pls(src, titleindex):
 	# breaking up the pls file in separate strings
@@ -145,7 +148,6 @@ def setup():
 	#threading.Thread(target = open_microphone).start()
 
 	global frequency
-	read_config()
 	# open_microphone()
 	run_pifm()
 
@@ -154,7 +156,6 @@ def run_pifm(use_audio_in=False):
 	global fm_process
 	with open(os.devnull, "w") as dev_null:
 		fm_process = subprocess.Popen(["/root/pifm","-",str(frequency),"44100", "stereo" if play_stereo else "mono"], stdin=music_pipe_r, stdout=dev_null)
-
 		#if use_audio_in == False:
 		#else:
 		#	fm_process = subprocess.Popen(["/root/pifm2","-",str(frequency),"44100"], stdin=microphone_pipe_r, stdout=dev_null)
