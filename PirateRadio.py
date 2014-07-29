@@ -17,11 +17,7 @@ GPIO.setup(11, GPIO.IN)#Button
 GPIO.setup(13, GPIO.IN)#Button
 GPIO.setup(15, GPIO.IN)#Button
 GPIO.setup(7, GPIO.IN)#Button
-
-GPIO.setup(12, GPIO.OUT)#LCD Display
-GPIO.setup(16, GPIO.OUT)#LCD Display
-GPIO.setup(22, GPIO.OUT)#LCD Display
-GPIO.setup(18, GPIO.OUT #LCD Display
+GPIO.setup(12, GPIO.IN)#Button
 
 fm_process = None
 on_off = ["off", "on"]
